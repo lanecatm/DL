@@ -1,10 +1,14 @@
 package distrubutelock;
 
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import distrubutelock.Message;
+import distrubutelock.SocketUtil;
 
 /**
  * @author xfhuang
@@ -42,7 +46,6 @@ class ServerThread implements Runnable {
 		this.client = client;
 	}
 
-	@Override
 	public void run() {
 		try {
 			//接受消息
@@ -53,6 +56,8 @@ class ServerThread implements Runnable {
 			//     下面2行删掉，改成new一个新回复消息
 			message.setLockKey("server" + message.getLockKey());
 			message.setClientId("server" + message.getClientId());
+			
+			
 			
 			//发送消息
 			SocketUtil.sendMessage(client, message);

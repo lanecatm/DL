@@ -39,9 +39,9 @@ public class Client {
 	
 	
 	
-	public static void sendMessage(String ip, int host, Message message) throws IOException {
+	public static void sendMessage(String ip, int port, Message message) throws IOException {
 		// 客户端请求与本机在20006端口建立TCP连接
-		Socket client = new Socket(ip, host);
+		Socket client = new Socket(ip, port);
 		client.setSoTimeout(10000);
 		
 		SocketUtil.sendMessage(client, message);
