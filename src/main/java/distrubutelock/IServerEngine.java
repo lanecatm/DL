@@ -8,11 +8,14 @@ package distrubutelock;
 */
 public interface IServerEngine {
 	
-	public String handleTryLock(String clientId, String lockKey);
+	public Message handleTryLock(String clientId, String lockKey);
 	
-	public String handleTryRelease(String clientId, String lockKey);
+	public Message handleTryRelease(String clientId, String lockKey);
 	
-	public String handleCheck(String clientId, String lockKey);
+	public Message handleCheck(String clientId, String lockKey);
+	
+	
+	public Message handle(Message message);
 	
 	
 
