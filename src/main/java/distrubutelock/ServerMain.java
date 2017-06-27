@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
 
 import distrubutelock.Message;
 import distrubutelock.SocketUtil;
@@ -17,6 +18,9 @@ import distrubutelock.SocketUtil;
  * @version Introduction
  */
 public class ServerMain {
+	
+	public static ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
+	
 	public static void main(String[] args) throws Exception {
 		// TODO 从服务器中读出端口号
 		int port = 20006;
@@ -58,8 +62,8 @@ class ServerThread implements Runnable {
 			if (isLeader) {
 				serverEngine = new LeaderServerEngine();
 			} else {
-				//serverEngine = new FollowerServerEngine();
-				serverEngine = new LeaderServerEngine();
+				serverEngine = new FollowerServerEngine();
+				//serverEngine = new LeaderServerEngine();
 			}
 
 			// 修改消息
@@ -67,7 +71,7 @@ class ServerThread implements Runnable {
 			Message returnMessage = serverEngine.handle(message);
 
 			// 发送消息
-			SocketUtil.sendMessage(client, message);
+			SocketUtil.sendMessage(client, returnMessage);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

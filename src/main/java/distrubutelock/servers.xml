@@ -1,2 +1,17 @@
 <servers>
-	<server host="127.0.0.1"></server></servers>
+	<server>
+		<ip>127.0.0.1</ip>
+		<port>5000</port>
+        <isLeader>true</isLeader>
+    </server>
+	<server>
+		<ip>127.0.0.1</ip>
+		<port>5001</port>
+        <isLeader>false</isLeader>
+    </server>
+	<server>
+		<ip>127.0.0.1</ip>
+		<port>5002</port>
+        <isLeader>false</isLeader>
+    </server>
+</servers>
