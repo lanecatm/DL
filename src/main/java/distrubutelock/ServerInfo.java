@@ -2,10 +2,10 @@ package distrubutelock;
 
 public class ServerInfo {
 	String ip;
-	String port;
+	int port;
 	Boolean isLeader;
 	
-	ServerInfo(String ip, String port, Boolean isLeader) {
+	ServerInfo(String ip, int port, Boolean isLeader) {
 		this.ip = ip;
 		this.port = port;
 		this.isLeader = isLeader;

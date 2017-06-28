@@ -1,8 +1,18 @@
 package distrubutelock;
 
+import java.io.IOException;
+import java.util.List;
+
 public class LeaderServerEngine implements IServerEngine {
 	private void broadcast(Message message) {
-		// TBD
+		List<ServerInfo> followers = ClusterInfo.getFollowers();
+		for (ServerInfo element : followers) {
+			try {
+				Client.sendMessage(element.ip, element.port, message);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public Message handleTryLock(String clientId, String lockKey) {

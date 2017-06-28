@@ -69,9 +69,10 @@ class ServerThread implements Runnable {
 			// 修改消息
 			// TODO 把消息放到ServerEngine里面处理
 			Message returnMessage = serverEngine.handle(message);
-
+			if (returnMessage != null){
 			// 发送消息
 			SocketUtil.sendMessage(client, returnMessage);
+			} 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

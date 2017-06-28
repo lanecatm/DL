@@ -1,8 +1,16 @@
 package distrubutelock;
 
+import java.io.IOException;
+
 public class FollowerServerEngine implements IServerEngine {
 
 	private Message requestLeader(Message message) {
+		ServerInfo leader = ClusterInfo.getLeader();
+		try {
+			Client.sendMessage(leader.ip, leader.port, message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
@@ -15,7 +23,7 @@ public class FollowerServerEngine implements IServerEngine {
 	}
 
 	public Message handleCheck(String clientId, String lockKey) {
-		Message returnMessage = new Message(Message.Status.FAILED, clientId, lockKey, true);
+		Message returnMessage = new Message(Message.Status.FAILED, "", lockKey, true);
 		String occupier = ServerMain.map.get(lockKey);
 		
 		if (occupier != null) {
@@ -27,26 +35,17 @@ public class FollowerServerEngine implements IServerEngine {
 	}
 	
 	public Message lock(String clientId, String lockKey) {
-		Message returnMessage = new Message(Message.Status.FAILED, clientId, lockKey, true);
 		
-		if (ServerMain.map.get(lockKey) == null) {
-			ServerMain.map.put(lockKey, clientId);
-			returnMessage.setStatus(Message.Status.SUCC);
-		}
+		ServerMain.map.put(lockKey, clientId);
 		
-		return returnMessage;
+		return null;
 
 	}
 	
 	public Message release(String clientId, String lockKey) {
-		Message returnMessage = new Message(Message.Status.FAILED, clientId, lockKey, true);
-		String occupier = ServerMain.map.get(lockKey);
+		ServerMain.map.remove(lockKey);
 		
-		if ( occupier != null && occupier.equals(clientId)) {
-			ServerMain.map.remove(lockKey);
-			returnMessage.setStatus(Message.Status.SUCC);
-		}
-		return returnMessage;
+		return null;
 	}
 
 	public Message handle(Message message) {
@@ -77,6 +76,9 @@ public class FollowerServerEngine implements IServerEngine {
 				returnMessage = new Message(Message.Status.FAILED, "", "", true);
 			}
 			break;
+		case Message.Status.SUCC:
+		case Message.Status.FAILED:
+			returnMessage = null;
 		default:
 			System.out.println("Error, leader server receive message:" + message.toString());
 			returnMessage = new Message(Message.Status.FAILED, "", "", true);
