@@ -1,30 +1,29 @@
 package distrubutelock;
 
 import java.io.IOException;
-import java.util.List;
 
-public class LeaderServerEngine implements IServerEngine {
-	private void broadcast(Message message) {
-		List<ServerInfo> followers = ClusterInfo.getFollowers();
-		for (ServerInfo element : followers) {
-			try {
-				Client.sendMessage(element.ip, element.port, message);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+public class FollowerServerEngine implements IServerEngine {
+
+	private Message requestLeader(Message message) {
+		ServerInfo leader = ClusterInfo.getLeader();
+		try {
+			Client.sendMessage(leader.ip, leader.port, message);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return null;
 	}
 	
 	public Message handleTryLock(String clientId, String lockKey) {
-		return lock(clientId, lockKey);
+		return requestLeader(new Message(Message.Status.LOCK, clientId, lockKey, true));
 	}
 
 	public Message handleTryRelease(String clientId, String lockKey) {
-		return release(clientId, lockKey);
+		return requestLeader(new Message(Message.Status.RELEASE, clientId, lockKey, true));
 	}
 
 	public Message handleCheck(String clientId, String lockKey) {
-		Message returnMessage = new Message(Message.Status.FAILED, clientId, lockKey, true);
+		Message returnMessage = new Message(Message.Status.FAILED, "", lockKey, true);
 		String occupier = ServerMain.map.get(lockKey);
 		
 		if (occupier != null) {
@@ -34,30 +33,19 @@ public class LeaderServerEngine implements IServerEngine {
 		
 		return returnMessage;
 	}
-
+	
 	public Message lock(String clientId, String lockKey) {
-		Message returnMessage = new Message(Message.Status.FAILED, clientId, lockKey, true);
 		
-		if (ServerMain.map.get(lockKey) == null) {
-			ServerMain.map.put(lockKey, clientId);
-			returnMessage.setStatus(Message.Status.SUCC);
-			broadcast(new Message(Message.Status.LOCK, clientId, lockKey, true)); 
-		}
+		ServerMain.map.put(lockKey, clientId);
 		
-		return returnMessage;
+		return null;
 
 	}
-
+	
 	public Message release(String clientId, String lockKey) {
-		Message returnMessage = new Message(Message.Status.FAILED, clientId, lockKey, true);
-		String occupier = ServerMain.map.get(lockKey);
+		ServerMain.map.remove(lockKey);
 		
-		if ( occupier != null && occupier.equals(clientId)) {
-			ServerMain.map.remove(lockKey);
-			returnMessage.setStatus(Message.Status.SUCC);
-			broadcast(new Message(Message.Status.RELEASE, clientId, lockKey, true));
-		}
-		return returnMessage;
+		return null;
 	}
 
 	public Message handle(Message message) {
@@ -88,6 +76,9 @@ public class LeaderServerEngine implements IServerEngine {
 				returnMessage = new Message(Message.Status.FAILED, "", "", true);
 			}
 			break;
+		case Message.Status.SUCC:
+		case Message.Status.FAILED:
+			returnMessage = null;
 		default:
 			System.out.println("Error, leader server receive message:" + message.toString());
 			returnMessage = new Message(Message.Status.FAILED, "", "", true);

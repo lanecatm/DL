@@ -1,10 +1,15 @@
 package distrubutelock;
 
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
+
+import distrubutelock.Message;
+import distrubutelock.SocketUtil;
 
 /**
  * @author xfhuang
@@ -13,6 +18,9 @@ import java.net.Socket;
  * @version Introduction
  */
 public class ServerMain {
+	
+	public static ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
+	
 	public static void main(String[] args) throws Exception {
 		// TODO 从服务器中读出端口号
 		int port = 20006;
@@ -45,7 +53,6 @@ class ServerThread implements Runnable {
 		this.isLeader = isLeader;
 	}
 
-	@Override
 	public void run() {
 		try {
 			// 接受消息
@@ -55,16 +62,17 @@ class ServerThread implements Runnable {
 			if (isLeader) {
 				serverEngine = new LeaderServerEngine();
 			} else {
-				//serverEngine = new FollowerServerEngine();
-				serverEngine = new LeaderServerEngine();
+				serverEngine = new FollowerServerEngine();
+				//serverEngine = new LeaderServerEngine();
 			}
 
 			// 修改消息
 			// TODO 把消息放到ServerEngine里面处理
 			Message returnMessage = serverEngine.handle(message);
-
+			if (returnMessage != null){
 			// 发送消息
-			SocketUtil.sendMessage(client, message);
+			SocketUtil.sendMessage(client, returnMessage);
+			} 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
