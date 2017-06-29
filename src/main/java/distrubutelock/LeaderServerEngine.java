@@ -8,7 +8,7 @@ public class LeaderServerEngine implements IServerEngine {
 		List<ServerInfo> followers = ClusterInfo.getFollowers();
 		for (ServerInfo element : followers) {
 			try {
-				Client.sendMessage(element.ip, element.port, message);
+				SocketUtil.sendMessage(element.ip, element.port, message);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

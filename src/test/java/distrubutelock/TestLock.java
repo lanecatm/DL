@@ -17,15 +17,44 @@ public class TestLock {
 	@Test
 	public void test() {
 		// 在测试之前打开3个server
-		new Thread(new ServerMainThread(20006)).start();
-		new Thread(new ServerMainThread(20007)).start();
-		new Thread(new ServerMainThread(20008)).start();
-		Message message = new Message(Message.Status.TRY_LOCK, "Client 1", lockKey, false);
-		sendMessage("127.0.0.1", 20006, message);
-		Message message = new Message(Message.Status.TRY_LOCK, "Client 1", lockKey, false);
-		sendMessage("127.0.0.1", 20006, message);
-		Message message = new Message(Message.Status.TRY_LOCK, "Client 1", lockKey, false);
-		sendMessage("127.0.0.1", 20006, message);
+		new Thread(new ServerMainThread(50000)).start();
+		new Thread(new ServerMainThread(50001)).start();
+		new Thread(new ServerMainThread(50002)).start();
+		Message message = new Message(Message.Status.TRY_LOCK, "Client 1", "1", false);
+		try {
+			SocketUtil.sendMessage("127.0.0.1", 50000, message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Message message1 = new Message(Message.Status.TRY_LOCK, "Client 1", "1", false);
+		try {
+			SocketUtil.sendMessage("127.0.0.1", 50000, message1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			SocketUtil.sendMessage("127.0.0.1", 50001, message1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Message message2 = new Message(Message.Status.CHECK_STATUS, "Client 1", "1", false);
+		try {
+			SocketUtil.sendMessage("127.0.0.1", 50000, message2);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Message message3 = new Message(Message.Status.RELEASE, "Client 1", "1", false);
+		try {
+			SocketUtil.sendMessage("127.0.0.1", 50000, message3);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Message message4 = new Message(Message.Status.CHECK_STATUS, "Client 1", "1", false);
+		try {
+			SocketUtil.sendMessage("127.0.0.1", 50000, message4);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 

@@ -6,14 +6,15 @@ public class FollowerServerEngine implements IServerEngine {
 
 	private Message requestLeader(Message message) {
 		ServerInfo leader = ClusterInfo.getLeader();
+		Message backMessage = null;
 		try {
-			Client.sendMessage(leader.ip, leader.port, message);
+			backMessage = SocketUtil.sendMessage(leader.ip, leader.port, message);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return backMessage;
 	}
-	
+
 	public Message handleTryLock(String clientId, String lockKey) {
 		return requestLeader(new Message(Message.Status.LOCK, clientId, lockKey, true));
 	}
@@ -25,27 +26,36 @@ public class FollowerServerEngine implements IServerEngine {
 	public Message handleCheck(String clientId, String lockKey) {
 		Message returnMessage = new Message(Message.Status.FAILED, "", lockKey, true);
 		String occupier = ServerMain.map.get(lockKey);
-		
+
 		if (occupier != null) {
 			returnMessage.setClientId(occupier);
 			returnMessage.setStatus(Message.Status.SUCC);
 		}
-		
+
 		return returnMessage;
 	}
-	
+
 	public Message lock(String clientId, String lockKey) {
-		
-		ServerMain.map.put(lockKey, clientId);
-		
-		return null;
+
+		try {
+			ServerMain.map.put(lockKey, clientId);
+			return new Message(Message.Status.SUCC, "", "", true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new Message(Message.Status.FAILED, "", "", true);
+		}
 
 	}
-	
+
 	public Message release(String clientId, String lockKey) {
-		ServerMain.map.remove(lockKey);
-		
-		return null;
+
+		try {
+			ServerMain.map.remove(lockKey);
+			return new Message(Message.Status.SUCC, "", "", true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new Message(Message.Status.FAILED, "", "", true);
+		}
 	}
 
 	public Message handle(Message message) {
@@ -76,9 +86,6 @@ public class FollowerServerEngine implements IServerEngine {
 				returnMessage = new Message(Message.Status.FAILED, "", "", true);
 			}
 			break;
-		case Message.Status.SUCC:
-		case Message.Status.FAILED:
-			returnMessage = null;
 		default:
 			System.out.println("Error, leader server receive message:" + message.toString());
 			returnMessage = new Message(Message.Status.FAILED, "", "", true);
