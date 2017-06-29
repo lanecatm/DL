@@ -13,8 +13,16 @@ import org.junit.Test;
 */
 public class TestSocket {
 
+	
 	@Test
 	public void test() {
+		Message message = new Message(Message.Status.TRY_LOCK, "client1", "1", false);
+		try {
+			Client.sendMessage("127.0.0.1", 20006, message);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
