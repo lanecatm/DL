@@ -24,6 +24,9 @@ public class ServerMain {
 	public static void main(String[] args) throws Exception {
 		// TODO 从服务器中读出端口号
 		int port = 20006;
+		// int port = Integer.parseInt(args[0]);
+		Boolean isLeader = false;
+		// Boolean isLeader = Boolean.parseBoolean(args[1]);
 
 		// 服务端在端口监听客户端请求的TCP连接
 		ServerSocket server = new ServerSocket(port);
@@ -36,7 +39,7 @@ public class ServerMain {
 			System.out.println("与客户端连接成功！");
 			// 为每个客户端连接开启一个线程
 			// TODO 改这里
-			Boolean isLeader = false;
+			
 			new Thread(new ServerThread(client, isLeader)).start();
 		}
 		server.close();

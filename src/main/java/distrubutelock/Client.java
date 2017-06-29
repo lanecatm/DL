@@ -25,15 +25,15 @@ public class Client {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.print("输入client id:");
 		String clientId = input.readLine();
-		System.out.print("输入server id:");
+		System.out.print("输入server port:");
 		int serverId = Integer.parseInt(input.readLine());
 		System.out.print("输入lock key:");
 		String lockKey = input.readLine();
-		System.out.print("输入操作id:");
+		System.out.print("输入操作id: [1]Lock [2]Release [3]Check ");
 		int status = Integer.parseInt(input.readLine());
-		Message message = new Message(Message.Status.TRY_LOCK, clientId, lockKey, false);
+		Message message = new Message(status, clientId, lockKey, false);
 		//TODO 从xml读入Server的列表，根据选择的id向对应的server发送请求
-		SocketUtil.sendMessage("127.0.0.1", 20006, message);
+		SocketUtil.sendMessage("127.0.0.1", serverId, message);
 	}
 	
 	
