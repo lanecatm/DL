@@ -1,5 +1,7 @@
 package distrubutelock;
 
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 
 import org.junit.Test;
@@ -16,12 +18,18 @@ public class TestSocket {
 	
 	@Test
 	public void test() {
+		new Thread(new ServerMainThread(50000, true)).start();
 		Message message = new Message(Message.Status.TRY_LOCK, "client1", "1", false);
 		try {
-			SocketUtil.sendMessage("127.0.0.1", 20006, message);
+			Message backMessage = SocketUtil.sendMessage("127.0.0.1", 50000, message);
+			System.out.println(backMessage);
+			backMessage = SocketUtil.sendMessage("127.0.0.1", 50000, message);
+			System.out.println(backMessage);
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			fail();
 		}
 	}
 
