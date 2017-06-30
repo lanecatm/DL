@@ -51,7 +51,7 @@ public class SocketUtil {
 		try {
 			// 从服务器端接收数据有个时间限制（系统自设，也可以自己设置），超过了这个时间，便会抛出该异常
 			backMessage = SocketUtil.getMessage(client);
-			System.out.println(backMessage);
+			//System.out.println(backMessage);
 		} catch (SocketTimeoutException e) {
 			System.out.println("Time out, No response");
 		}

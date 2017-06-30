@@ -14,7 +14,7 @@ public class LeaderServerEngine implements IServerEngine {
 			}
 		}
 	}
-
+	
 	public Message handleTryLock(String clientId, String lockKey) {
 		return lock(clientId, lockKey);
 	}
@@ -24,7 +24,7 @@ public class LeaderServerEngine implements IServerEngine {
 	}
 
 	public Message handleCheck(String clientId, String lockKey) {
-		Message returnMessage = new Message(Message.Status.FAILED, clientId, lockKey, true);
+		Message returnMessage = new Message(Message.Status.FAILED, "", lockKey, true);
 		String occupier = ServerMain.map.get(lockKey);
 
 		if (occupier != null) {
@@ -37,27 +37,25 @@ public class LeaderServerEngine implements IServerEngine {
 
 	public Message lock(String clientId, String lockKey) {
 		Message returnMessage = new Message(Message.Status.FAILED, clientId, lockKey, true);
-
-		if (!ServerMain.map.containsKey(lockKey)) {
+		
+		if (ServerMain.map.get(lockKey) == null) {
 			ServerMain.map.put(lockKey, clientId);
 			returnMessage.setStatus(Message.Status.SUCC);
-			broadcast(new Message(Message.Status.LOCK, clientId, lockKey, true));
+			broadcast(new Message(Message.Status.LOCK, clientId, lockKey, true)); 
 		}
-
+		
 		return returnMessage;
 
 	}
 
 	public Message release(String clientId, String lockKey) {
 		Message returnMessage = new Message(Message.Status.FAILED, clientId, lockKey, true);
+		String occupier = ServerMain.map.get(lockKey);
 		
-		if (ServerMain.map.containsKey(lockKey)) {
-			String occupier = ServerMain.map.get(lockKey);
-			if (occupier != null && occupier.equals(clientId)) {
-				ServerMain.map.remove(lockKey);
-				returnMessage.setStatus(Message.Status.SUCC);
-				broadcast(new Message(Message.Status.RELEASE, clientId, lockKey, true));
-			}
+		if ( occupier != null && occupier.equals(clientId)) {
+			ServerMain.map.remove(lockKey);
+			returnMessage.setStatus(Message.Status.SUCC);
+			broadcast(new Message(Message.Status.RELEASE, clientId, lockKey, true));
 		}
 		return returnMessage;
 	}

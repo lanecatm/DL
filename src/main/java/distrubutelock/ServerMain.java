@@ -22,27 +22,41 @@ public class ServerMain {
 	public static ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
 
 	public static void main(String[] args) throws Exception {
-		// TODO 从服务器中读出端口号
-		int port = 20006;
-		// int port = Integer.parseInt(args[0]);
-		Boolean isLeader = false;
-		// Boolean isLeader = Boolean.parseBoolean(args[1]);
+		new Thread(new ServerMainThread(50000, true)).start();
+		new Thread(new ServerMainThread(50001, false)).start();
+		new Thread(new ServerMainThread(50002, false)).start();	
+	}
+}
+class ServerMainThread implements Runnable {
+
+	private int port;
+	private Boolean isLeader;
+	public ServerMainThread(int port, Boolean isLeader){
+		this.port = port;
+		this.isLeader = isLeader;
+		
+	}
+	public void run() {
 
 		// 服务端在端口监听客户端请求的TCP连接
-		ServerSocket server = new ServerSocket(port);
-		Socket client = null;
+		ServerSocket server;
+		try {
+			server = new ServerSocket(port);
+			Socket client = null;
 
-		boolean f = true;
-		while (f) {
-			// 等待客户端的连接，如果没有获取连接
-			client = server.accept();
-			System.out.println("与客户端连接成功！");
-			// 为每个客户端连接开启一个线程
-			// TODO 改这里
-			
-			new Thread(new ServerThread(client, isLeader)).start();
+			boolean f = true;
+			while (f) {
+				// 等待客户端的连接，如果没有获取连接
+				client = server.accept();
+				// System.out.println("与客户端连接成功！");
+				// 为每个客户端连接开启一个线程
+				new Thread(new ServerThread(client, isLeader)).start();
+			}
+			server.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		server.close();
+
 	}
 }
 
@@ -60,9 +74,9 @@ class ServerThread implements Runnable {
 		try {
 			// 接受消息
 			Message message = SocketUtil.getMessage(client);
-
+			// System.out.println("Receive message: " + message.toString());
+			
 			IServerEngine serverEngine;
-			System.out.println(isLeader);
 			if (isLeader) {
 				serverEngine = new LeaderServerEngine();
 			} else {
@@ -71,12 +85,13 @@ class ServerThread implements Runnable {
 			}
 
 			// 修改消息
-			// TODO 把消息放到ServerEngine里面处理
+			// 把消息放到ServerEngine里面处理
 			Message returnMessage = serverEngine.handle(message);
 			if (returnMessage != null) {
 				// 发送消息
 				SocketUtil.sendMessage(client, returnMessage);
 			}
+			// System.out.println("Receive message: " + message.toString());
             client.close();  
 
 		} catch (Exception e) {

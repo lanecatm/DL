@@ -156,36 +156,3 @@ public class TestLock {
 	}
 
 }
-
-class ServerMainThread implements Runnable {
-
-	private int port;
-	private Boolean isLeader;
-	public ServerMainThread(int port, Boolean isLeader){
-		this.port = port;
-		this.isLeader = isLeader;
-		
-	}
-	public void run() {
-
-		// 服务端在端口监听客户端请求的TCP连接
-		ServerSocket server;
-		try {
-			server = new ServerSocket(port);
-			Socket client = null;
-
-			boolean f = true;
-			while (f) {
-				// 等待客户端的连接，如果没有获取连接
-				client = server.accept();
-				System.out.println("与客户端连接成功！");
-				// 为每个客户端连接开启一个线程
-				new Thread(new ServerThread(client, isLeader)).start();
-			}
-			server.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-}
